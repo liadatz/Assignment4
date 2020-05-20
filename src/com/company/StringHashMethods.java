@@ -1,3 +1,5 @@
+package com.company;
+
 public class StringHashMethods implements HashMethods
 {
     private final long [ ] MULTIPLIERS;
