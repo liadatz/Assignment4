@@ -18,14 +18,14 @@ public class BTree<T extends Comparable<T>> {
     /**
      * Constructor for B-Tree which defaults to a 2-3 B-Tree.
      */
-    public BTree() { }
+    public BTree() {
+    }
 
     /**
-     * Constructor for B-Tree of ordered parameter. Order here means minimum 
-     * number of keys in a non-root node. 
-     * 
-     * @param order
-     *            of the B-Tree.
+     * Constructor for B-Tree of ordered parameter. Order here means minimum
+     * number of keys in a non-root node.
+     *
+     * @param order of the B-Tree.
      */
     public BTree(int order) {
         this.minKeySize = order;
@@ -33,24 +33,87 @@ public class BTree<T extends Comparable<T>> {
         this.maxKeySize = 2 * minKeySize;
         this.maxChildrenSize = maxKeySize + 1;
     }
-    
+
     //Task 2.1
     public boolean insert(T value) {
-    	// TODO: implement your code here
-		return false;
+        // TODO: implement your code here
+        return false;
     }
-	
+
     public T delete(T value) {
-    	// TODO: implement your code here
-		return null;
+        return delete(value, root);
     }
-    
-	//Task 2.2
+
+    private T delete(T value, Node<T> node) {
+        if (node == null) return null;
+
+        if (node.parent != null && node.numberOfKeys() < minKeySize) {
+            this.combined(node);
+        }
+
+        int index = node.indexOf(value);
+        if (index == -1) {
+            int nextNodeIndex = this.getIndexOfPreviousValue(node, value);
+            Node<T> nextNode = node.getChild(nextNodeIndex);
+            return this.delete(value, nextNode);
+        }
+
+        // leaf node
+        if (node.numberOfChildren() == 0) {
+            T removed = node.removeKey(value);
+            if (node.parent == null && node.numberOfKeys() == 0) {
+                // Removing root node with no keys or children
+                root = null;
+            }
+            size--;
+            return removed;
+
+        }
+        // internal node
+        Node<T> lesser = node.getChild(index);
+        Node<T> predecessorNode = this.getGreatestNode(lesser);
+        if (predecessorNode.numberOfKeys() >= minKeySize) {
+            T predecessor = predecessorNode.getKey(predecessorNode.numberOfKeys() - 1);
+            this.delete(predecessor, node);
+            node.keys[index] = predecessor;
+            size--;
+            return value;
+        }
+        Node<T> greater = node.getChild(index + 1);
+        Node<T> successorNode = this.getSmallestNode(greater);
+        if (successorNode.numberOfKeys() >= minKeySize) {
+            T successor = successorNode.getKey(0);
+            this.delete(successor, node);
+            node.keys[index] = successor;
+            size--;
+            return value;
+        }
+
+        //Needs to merge
+        Node<T> mergedNode = this.merge(lesser,node,value,greater);
+        return delete(value,mergedNode);
+    }
+
+    private Node<T> merge(Node<T> lesser, Node<T> node,T value, Node<T> greater) {
+        Node<T> mergedNode = lesser;
+        lesser.addKey(value);
+        for (int i=0; i<greater.numberOfKeys();i=i+1){
+            mergedNode.addKey(greater.keys[i]);
+            mergedNode.addChild(greater.getChild(i));
+        }
+        mergedNode.addChild(greater.getChild(greater.numberOfKeys()));
+        node.removeChild(greater);
+        node.removeKey(value);
+        return mergedNode;
+    }
+
+
+    //Task 2.2
     public boolean insert2pass(T value) {
-    	// TODO: implement your code here
-		return false;
+        // TODO: implement your code here
+        return false;
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -66,7 +129,7 @@ public class BTree<T extends Comparable<T>> {
                     if (node.numberOfKeys() <= maxKeySize) {
                         // A-OK
                         break;
-                    }                         
+                    }
                     // Need to split up
                     split(node);
                     break;
@@ -108,9 +171,8 @@ public class BTree<T extends Comparable<T>> {
 
     /**
      * The node's key size is greater than maxKeySize, split down the middle.
-     * 
-     * @param nodeToSplit
-     *            to split.
+     *
+     * @param nodeToSplit to split.
      */
     private void split(Node<T> nodeToSplit) {
         Node<T> node = nodeToSplit;
@@ -167,17 +229,15 @@ public class BTree<T extends Comparable<T>> {
     public T remove(T value) {
         T removed = null;
         Node<T> node = this.getNode(value);
-        removed = remove(value,node);
+        removed = remove(value, node);
         return removed;
     }
 
     /**
      * Remove the value from the Node and check invariants
-     * 
-     * @param value
-     *            T to remove from the tree
-     * @param node
-     *            Node to remove value from
+     *
+     * @param value T to remove from the tree
+     * @param node  Node to remove value from
      * @return True if value was removed from the tree.
      */
     private T remove(T value, Node<T> node) {
@@ -215,9 +275,8 @@ public class BTree<T extends Comparable<T>> {
 
     /**
      * Remove greatest valued key from node.
-     * 
-     * @param node
-     *            to remove greatest value from.
+     *
+     * @param node to remove greatest value from.
      * @return value removed;
      */
     private T removeGreatestValue(Node<T> node) {
@@ -246,9 +305,8 @@ public class BTree<T extends Comparable<T>> {
 
     /**
      * Get the node with value.
-     * 
-     * @param value
-     *            to find in the tree.
+     *
+     * @param value to find in the tree.
      * @return Node<T> with value.
      */
     private Node<T> getNode(T value) {
@@ -298,9 +356,8 @@ public class BTree<T extends Comparable<T>> {
 
     /**
      * Get the greatest valued child from node.
-     * 
-     * @param nodeToGet
-     *            child with the greatest value.
+     *
+     * @param nodeToGet child with the greatest value.
      * @return Node<T> child with greatest value.
      */
     private Node<T> getGreatestNode(Node<T> nodeToGet) {
@@ -312,10 +369,23 @@ public class BTree<T extends Comparable<T>> {
     }
 
     /**
+     * Get the smallest valued child from node.
+     *
+     * @param nodeToGet child with the smallest value.
+     * @return Node<T> child with smallest value.
+     */
+    private Node<T> getSmallestNode(Node<T> nodeToGet) {
+        Node<T> node = nodeToGet;
+        while (node.numberOfChildren() > 0) {
+            node = node.getChild(0);
+        }
+        return node;
+    }
+
+    /**
      * Combined children keys with parent when size is less than minKeySize.
-     * 
-     * @param node
-     *            with children to combined.
+     *
+     * @param node with children to combined.
      * @return True if combined successfully.
      */
     private boolean combined(Node<T> node) {
@@ -420,11 +490,9 @@ public class BTree<T extends Comparable<T>> {
 
     /**
      * Get the index of previous key in node.
-     * 
-     * @param node
-     *            to find the previous key in.
-     * @param value
-     *            to find a previous value for.
+     *
+     * @param node  to find the previous key in.
+     * @param value to find a previous value for.
      * @return index of previous key or -1 if not found.
      */
     private int getIndexOfPreviousValue(Node<T> node, T value) {
@@ -438,11 +506,9 @@ public class BTree<T extends Comparable<T>> {
 
     /**
      * Get the index of next key in node.
-     * 
-     * @param node
-     *            to find the next key in.
-     * @param value
-     *            to find a next value for.
+     *
+     * @param node  to find the next key in.
+     * @param value to find a next value for.
      * @return index of next key or -1 if not found.
      */
     private int getIndexOfNextValue(Node<T> node, T value) {
@@ -471,9 +537,8 @@ public class BTree<T extends Comparable<T>> {
 
     /**
      * Validate the node according to the B-Tree invariants.
-     * 
-     * @param node
-     *            to validate.
+     *
+     * @param node to validate.
      * @return True if valid.
      */
     private boolean validateNode(Node<T> node) {
@@ -559,8 +624,8 @@ public class BTree<T extends Comparable<T>> {
     public String toString() {
         return TreePrinter.getString(this);
     }
-    
-    
+
+
     private static class Node<T extends Comparable<T>> {
 
         private T[] keys = null;
@@ -693,6 +758,7 @@ public class BTree<T extends Comparable<T>> {
         private int numberOfChildren() {
             return childrenSize;
         }
+
 
         /**
          * {@inheritDoc}
