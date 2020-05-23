@@ -9,8 +9,8 @@ public class BTree<T extends Comparable<T>> {
     // Default to 2-3 Tree
     private int minKeySize = 1;
     private int minChildrenSize = minKeySize + 1; // 2
-    private int maxKeySize = 2 * minKeySize; // 2
-    private int maxChildrenSize = maxKeySize + 1; // 3
+    private int maxKeySize = (2 * minKeySize) + 1; // 3
+    private int maxChildrenSize = maxKeySize + 1; // 4
 
     private Node<T> root = null;
     private int size = 0;
@@ -28,9 +28,9 @@ public class BTree<T extends Comparable<T>> {
      * @param order of the B-Tree.
      */
     public BTree(int order) {
-        this.minKeySize = order;
+        this.minKeySize = order - 1;
         this.minChildrenSize = minKeySize + 1;
-        this.maxKeySize = 2 * minKeySize;
+        this.maxKeySize = (2 * order) - 1;
         this.maxChildrenSize = maxKeySize + 1;
     }
 
@@ -42,7 +42,7 @@ public class BTree<T extends Comparable<T>> {
             Node<T> node = root;
             while (node != null) {
                 // Need to split up
-                if (node.keysSize > maxKeySize) {
+                if (node.keysSize == maxKeySize) {
                     node = split(node);
                 }
                 // OK to add
@@ -153,8 +153,58 @@ public class BTree<T extends Comparable<T>> {
 
     //Task 2.2
     public boolean insert2pass(T value) {
-        // TODO: implement your code here
-        return false;
+        if (root == null) {
+            root = new Node<T>(null, maxKeySize, maxChildrenSize);
+            root.addKey(value);
+        } else {
+            Node<T> node = root;
+            while (node != null) {
+                if (node.numberOfChildren() == 0) {
+                    node = insert2passAscent(node);
+                    node.addKey(value);
+                    break;
+                }
+                // Navigate
+
+                // Lesser or equal
+                T lesser = node.getKey(0);
+                if (value.compareTo(lesser) <= 0) {
+                    node = node.getChild(0);
+                    continue;
+                }
+
+                // Greater
+                int numberOfKeys = node.numberOfKeys();
+                int last = numberOfKeys - 1;
+                T greater = node.getKey(last);
+                if (value.compareTo(greater) > 0) {
+                    node = node.getChild(numberOfKeys);
+                    continue;
+                }
+
+                // Search internal nodes
+                for (int i = 1; i < node.numberOfKeys(); i++) {
+                    T prev = node.getKey(i - 1);
+                    T next = node.getKey(i);
+                    if (value.compareTo(prev) > 0 && value.compareTo(next) <= 0) {
+                        node = node.getChild(i);
+                        break;
+                    }
+                }
+            }
+        }
+        size++;
+        return true;
+    }
+
+    private Node<T> insert2passAscent (Node<T> node) {
+        if (node != null && node.parent != null && node.keysSize > maxKeySize && node.parent.keysSize > maxKeySize) {
+            insert2passAscent(node.parent);
+        }
+        if (node.keysSize > maxKeySize) {
+            node = split(node);
+        }
+        return node;
     }
 
     /**
@@ -266,7 +316,7 @@ public class BTree<T extends Comparable<T>> {
 
             //todo delete if not neeeded
 //            if (parent.numberOfKeys() > maxKeySize) split(parent);
-        }
+    }
 
     }
 
