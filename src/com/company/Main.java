@@ -3,22 +3,22 @@ package com.company;
 public class Main {
 
     public static void main(String[] args) {
-	    BTree tree = new BTree();
-		tree.insert(35);
-		tree.insert(31);
-		tree.insert(58);
-		tree.insert(16);
-		tree.insert(61);
-		tree.insert(25);
-		tree.insert(47);
-		tree.insert(30);
-		tree.insert(54);
-		tree.insert(92);
-		tree.insert(53);
-		tree.insert(94);
-		tree.insert(20);
-		System.out.println(tree.toString());
-		tree.delete(54);
-		System.out.println(tree.toString());
+		BTree<Integer> generatedTree = new BTree<Integer>(2);
+		generatedTree.insert(35);
+		generatedTree.insert(31);
+		generatedTree.insert(58);
+		generatedTree.insert(16);
+		generatedTree.insert(61);
+		generatedTree.insert(25);
+		generatedTree.insert(47);
+		generatedTree.insert(30);
+		generatedTree.insert(54);
+		generatedTree.insert(92);
+		generatedTree.insert(53);
+		generatedTree.insert(94);
+		generatedTree.insert(20);
+		System.out.println(generatedTree.toString());
+		generatedTree.delete(54);
+		System.out.println(generatedTree.toString());
     }
 }

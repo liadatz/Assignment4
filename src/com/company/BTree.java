@@ -90,13 +90,13 @@ public class BTree<T extends Comparable<T>> {
     private T delete(T value, Node<T> node) {
         if (node == null) return null;
 
-        if (node.parent != null && node.numberOfKeys() < minKeySize) {
+        if (node.parent != null && node.numberOfKeys() == minKeySize) {
             this.combined(node);
         }
 
         int index = node.indexOf(value);
         if (index == -1) {
-            int nextNodeIndex = this.getIndexOfPreviousValue(node, value);
+            int nextNodeIndex = this.getIndexOfNextValue(node, value);
             Node<T> nextNode = node.getChild(nextNodeIndex);
             return this.delete(value, nextNode);
         }
@@ -115,7 +115,7 @@ public class BTree<T extends Comparable<T>> {
         // internal node
         Node<T> lesser = node.getChild(index);
         Node<T> predecessorNode = this.getGreatestNode(lesser);
-        if (predecessorNode.numberOfKeys() >= minKeySize) {
+        if (predecessorNode.numberOfKeys() > minKeySize) {
             T predecessor = predecessorNode.getKey(predecessorNode.numberOfKeys() - 1);
             this.delete(predecessor, node);
             node.keys[index] = predecessor;
@@ -124,7 +124,7 @@ public class BTree<T extends Comparable<T>> {
         }
         Node<T> greater = node.getChild(index + 1);
         Node<T> successorNode = this.getSmallestNode(greater);
-        if (successorNode.numberOfKeys() >= minKeySize) {
+        if (successorNode.numberOfKeys() > minKeySize) {
             T successor = successorNode.getKey(0);
             this.delete(successor, node);
             node.keys[index] = successor;
@@ -616,7 +616,7 @@ public class BTree<T extends Comparable<T>> {
             if (t.compareTo(value) >= 0)
                 return i;
         }
-        return node.numberOfKeys() - 1;
+        return node.numberOfKeys()-1;
     }
 
     /**
