@@ -142,9 +142,13 @@ public class BTree<T extends Comparable<T>> {
         lesser.addKey(value);
         for (int i=0; i<greater.numberOfKeys();i=i+1){
             mergedNode.addKey(greater.keys[i]);
-            mergedNode.addChild(greater.getChild(i));
+            if (i<greater.numberOfChildren()) {
+                mergedNode.addChild(greater.getChild(i));
+            }
         }
-        mergedNode.addChild(greater.getChild(greater.numberOfKeys()));
+        if (greater.numberOfChildren()!=0) {
+            mergedNode.addChild(greater.getChild(greater.numberOfKeys()));
+        }
         node.removeChild(greater);
         node.removeKey(value);
         return mergedNode;
