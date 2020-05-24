@@ -96,7 +96,7 @@ public class BTree<T extends Comparable<T>> {
 
         int index = node.indexOf(value);
         if (index == -1) {
-            int nextNodeIndex = this.getIndexOfNextValue(node, value);
+            int nextNodeIndex = this.getIndexOfNextChild(node, value);
             Node<T> nextNode = node.getChild(nextNodeIndex);
             return this.delete(value, nextNode);
         }
@@ -621,6 +621,16 @@ public class BTree<T extends Comparable<T>> {
                 return i;
         }
         return node.numberOfKeys()-1;
+    }
+
+    private int getIndexOfNextChild(Node<T> node, T value){
+        int index = getIndexOfNextValue(node,value);
+        if (index==node.numberOfKeys()-1){
+            if (node.getKey(index).compareTo(value)<0){
+                index=node.numberOfKeys();
+            }
+        }
+        return index;
     }
 
     /**
