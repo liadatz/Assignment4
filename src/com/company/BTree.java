@@ -132,6 +132,8 @@ public class BTree<T extends Comparable<T>> {
             return value;
         }
 
+
+
         //Needs to merge
         Node<T> mergedNode = this.merge(lesser,node,value,greater);
         return delete(value,mergedNode);
@@ -151,6 +153,12 @@ public class BTree<T extends Comparable<T>> {
         }
         node.removeChild(greater);
         node.removeKey(value);
+        if (node.numberOfKeys()==0){
+            mergedNode.parent=node.parent;
+            if (node==root){
+                root=mergedNode;
+            }
+        }
         return mergedNode;
     }
 
