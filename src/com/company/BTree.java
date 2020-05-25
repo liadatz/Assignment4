@@ -114,19 +114,19 @@ public class BTree<T extends Comparable<T>> {
         }
         // internal node
         Node<T> lesser = node.getChild(index);
-        Node<T> predecessorNode = this.getGreatestNode(lesser);
-        if (predecessorNode.numberOfKeys() > minKeySize) {
+        if (lesser.numberOfKeys() > minKeySize) {
+            Node<T> predecessorNode = this.getGreatestNode(lesser);
             T predecessor = predecessorNode.getKey(predecessorNode.numberOfKeys() - 1);
-            this.delete(predecessor, node);
+            this.delete(predecessor, lesser);
             node.keys[index] = predecessor;
             size--;
             return value;
         }
         Node<T> greater = node.getChild(index + 1);
-        Node<T> successorNode = this.getSmallestNode(greater);
-        if (successorNode.numberOfKeys() > minKeySize) {
+        if (greater.numberOfKeys() > minKeySize) {
+            Node<T> successorNode = this.getSmallestNode(greater);
             T successor = successorNode.getKey(0);
-            this.delete(successor, node);
+            this.delete(successor, greater);
             node.keys[index] = successor;
             size--;
             return value;
