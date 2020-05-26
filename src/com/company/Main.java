@@ -4,24 +4,23 @@ public class Main {
 
     public static void main(String[] args) {
         BTree<Integer> generatedTree = new BTree<Integer>(2);
-        generatedTree.insert(93);
-        generatedTree.insert(89);
-        generatedTree.insert(67);
-        generatedTree.insert(32);
-        generatedTree.insert(57);
-        generatedTree.insert(33);
-        generatedTree.insert(78);
-        generatedTree.insert(92);
-        generatedTree.insert(54);
-        generatedTree.insert(55);
-        generatedTree.insert(21);
-
-        System.out.println(generatedTree.toString());
-        generatedTree.delete(57);
-        generatedTree.delete(78);
-        generatedTree.delete(33);
+//        for (int i = 1; i <= 10; i++) {
+//            generatedTree.insert2pass(i);
+//        }
+        generatedTree.insert2pass(19);
+        generatedTree.insert2pass(31);
+        generatedTree.insert2pass(91);
+        generatedTree.insert2pass(35);
+        generatedTree.insert2pass(46);
+        generatedTree.insert2pass(92);
+        generatedTree.insert2pass(61);
+        generatedTree.insert2pass(83);
+        generatedTree.insert2pass(48);
+        generatedTree.insert2pass(52);
 
         System.out.println(generatedTree.toString());
 
+
+        //        System.out.println(generatedTree.validate());
     }
 }

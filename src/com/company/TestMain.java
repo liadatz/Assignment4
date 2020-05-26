@@ -59,7 +59,7 @@ public class TestMain {
       System.out.println("-------------------------"); 
        
       System.out.println("Type 1 to generate a testing file");
-      System.out.println("Type 2 to run the testing file");
+      System.out.println("Type 2 to run the testing file"); 
       try{
           optionToUse = userInputScanner.nextInt();
           if(optionToUse != 1 && optionToUse != 2)
@@ -96,8 +96,7 @@ public class TestMain {
           System.out.println("Error while generating a tree..");
           System.exit(0);
       }
-      }
-      else{
+      }else{ 
       try{
       logFileGrabbedInfo         = parseLogFile("GeneratedTest.txt");
       String entireLogFileStr    = "";

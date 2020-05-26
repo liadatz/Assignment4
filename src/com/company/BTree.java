@@ -172,7 +172,10 @@ public class BTree<T extends Comparable<T>> {
             Node<T> node = root;
             while (node != null) {
                 if (node.numberOfChildren() == 0) {
-                    node = insert2passAscent(node);
+                    if (node.keysSize == maxKeySize) {
+                        node = insert2passAscent(node);
+                        continue;
+                    }
                     node.addKey(value);
                     break;
                 }
@@ -210,12 +213,11 @@ public class BTree<T extends Comparable<T>> {
     }
 
     private Node<T> insert2passAscent (Node<T> node) {
-        if (node != null && node.parent != null && node.keysSize > maxKeySize && node.parent.keysSize > maxKeySize) {
+        if (node.parent != null && node.parent.keysSize == maxKeySize) {
             insert2passAscent(node.parent);
         }
-        if (node.keysSize > maxKeySize) {
-            node = split(node);
-        }
+        node = split(node);
+
         return node;
     }
 
