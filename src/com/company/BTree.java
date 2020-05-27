@@ -35,18 +35,26 @@ public class BTree<T extends Comparable<T>> {
     }
 
     public boolean insert(T value) {
+        return internalInsert(value, false);
+    }
+
+    private boolean internalInsert(T value, boolean shouldUse2Pass) {
         if (root == null) {
             root = new Node<T>(null, maxKeySize, maxChildrenSize);
             root.addKey(value);
         } else {
             Node<T> node = root;
             while (node != null) {
-                // Need to split up
-                if (node.keysSize == maxKeySize) {
+                // Need to split up in 1pass
+                if (!shouldUse2Pass & node.keysSize == maxKeySize) {
                     node = split(node);
                 }
-                // OK to add
                 if (node.numberOfChildren() == 0) {
+                    // Need to split in 2pass
+                    if (shouldUse2Pass & node.keysSize == maxKeySize) {
+                        node = insert2passAscent(node);
+                        continue;
+                    }
                     node.addKey(value);
                     break;
                 }
@@ -165,51 +173,7 @@ public class BTree<T extends Comparable<T>> {
 
     //Task 2.2
     public boolean insert2pass(T value) {
-        if (root == null) {
-            root = new Node<T>(null, maxKeySize, maxChildrenSize);
-            root.addKey(value);
-        } else {
-            Node<T> node = root;
-            while (node != null) {
-                if (node.numberOfChildren() == 0) {
-                    if (node.keysSize == maxKeySize) {
-                        node = insert2passAscent(node);
-                        continue;
-                    }
-                    node.addKey(value);
-                    break;
-                }
-                // Navigate
-
-                // Lesser or equal
-                T lesser = node.getKey(0);
-                if (value.compareTo(lesser) <= 0) {
-                    node = node.getChild(0);
-                    continue;
-                }
-
-                // Greater
-                int numberOfKeys = node.numberOfKeys();
-                int last = numberOfKeys - 1;
-                T greater = node.getKey(last);
-                if (value.compareTo(greater) > 0) {
-                    node = node.getChild(numberOfKeys);
-                    continue;
-                }
-
-                // Search internal nodes
-                for (int i = 1; i < node.numberOfKeys(); i++) {
-                    T prev = node.getKey(i - 1);
-                    T next = node.getKey(i);
-                    if (value.compareTo(prev) > 0 && value.compareTo(next) <= 0) {
-                        node = node.getChild(i);
-                        break;
-                    }
-                }
-            }
-        }
-        size++;
-        return true;
+        return internalInsert(value, true);
     }
 
     private Node<T> insert2passAscent (Node<T> node) {
