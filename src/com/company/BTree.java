@@ -104,17 +104,21 @@ public class BTree<T extends Comparable<T>> {
     private T delete(T value, Node<T> node) {
         if (node == null) return null;
 
+        //Needs to combined because there are minimum keys and the node is not a root
         if (node.parent != null && node.numberOfKeys() == minKeySize) {
             this.combined(node);
         }
 
         int index = node.indexOf(value);
+        //if value not exist in node
         if (index == -1) {
+            //search for the next node that might contain value, and invoke delete from nextNode
             int nextNodeIndex = this.getIndexOfNextChild(node, value);
             Node<T> nextNode = node.getChild(nextNodeIndex);
             return this.delete(value, nextNode);
         }
 
+        // node contain value
         // leaf node
         if (node.numberOfChildren() == 0) {
             T removed = node.removeKey(value);
@@ -126,16 +130,19 @@ public class BTree<T extends Comparable<T>> {
             return removed;
 
         }
-        // internal node
+        // internal node - searching for substitute for value
+        //check predecessor first
         Node<T> lesser = node.getChild(index);
         if (lesser.numberOfKeys() > minKeySize) {
             Node<T> predecessorNode = this.getGreatestNode(lesser);
             T predecessor = predecessorNode.getKey(predecessorNode.numberOfKeys() - 1);
+            //invoke delete for predecessor
             this.delete(predecessor, lesser);
             node.keys[index] = predecessor;
             size--;
             return value;
         }
+        //check successor
         Node<T> greater = node.getChild(index + 1);
         if (greater.numberOfKeys() > minKeySize) {
             Node<T> successorNode = this.getSmallestNode(greater);
@@ -147,14 +154,17 @@ public class BTree<T extends Comparable<T>> {
         }
 
 
-        //Needs to merge
+        //predecessor and successor unfit - Needs to merge
         Node<T> mergedNode = this.merge(lesser, node, value, greater);
+        //invoke delete from mergeNode
         return delete(value, mergedNode);
     }
 
     private Node<T> merge(Node<T> lesser, Node<T> node, T value, Node<T> greater) {
+        //creating new mergeNode to be lesser and adding value
         Node<T> mergedNode = lesser;
         lesser.addKey(value);
+        //adding to mergeNode keys and children from greater
         for (int i = 0; i < greater.numberOfKeys(); i = i + 1) {
             mergedNode.addKey(greater.keys[i]);
             if (i < greater.numberOfChildren()) {
@@ -164,8 +174,10 @@ public class BTree<T extends Comparable<T>> {
         if (greater.numberOfChildren() != 0) {
             mergedNode.addChild(greater.getChild(greater.numberOfKeys()));
         }
+        //deleting greater and value from node
         node.removeChild(greater);
         node.removeKey(value);
+        //if after deletion the node is empty, update mergeNode parent to be node parent
         if (node.numberOfKeys() == 0) {
             mergedNode.parent = node.parent;
             if (node == root) {
