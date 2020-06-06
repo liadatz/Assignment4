@@ -37,10 +37,11 @@ public class BTree<T extends Comparable<T>> {
     public boolean insert(T value) {
         return internalInsert(value, false);
     }
+
     /**
      * Insert new element to the tree
      *
-     * @param value T to add to the tree
+     * @param value          T to add to the tree
      * @param shouldUse2Pass boolean determine which algorithm to use
      * @return True if value was added to the tree.
      */
@@ -139,7 +140,6 @@ public class BTree<T extends Comparable<T>> {
             //invoke delete for predecessor
             this.delete(predecessor, lesser);
             node.keys[index] = predecessor;
-            size--;
             return value;
         }
         //check successor
@@ -149,7 +149,6 @@ public class BTree<T extends Comparable<T>> {
             T successor = successorNode.getKey(0);
             this.delete(successor, greater);
             node.keys[index] = successor;
-            size--;
             return value;
         }
 
@@ -201,60 +200,6 @@ public class BTree<T extends Comparable<T>> {
         return node;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public boolean add(T value) {
-        if (root == null) {
-            root = new Node<T>(null, maxKeySize, maxChildrenSize);
-            root.addKey(value);
-        } else {
-            Node<T> node = root;
-            while (node != null) {
-                if (node.numberOfChildren() == 0) {
-                    node.addKey(value);
-                    if (node.numberOfKeys() <= maxKeySize) {
-                        // A-OK
-                        break;
-                    }
-                    // Need to split up
-                    split(node);
-                    break;
-                }
-                // Navigate
-
-                // Lesser or equal
-                T lesser = node.getKey(0);
-                if (value.compareTo(lesser) <= 0) {
-                    node = node.getChild(0);
-                    continue;
-                }
-
-                // Greater
-                int numberOfKeys = node.numberOfKeys();
-                int last = numberOfKeys - 1;
-                T greater = node.getKey(last);
-                if (value.compareTo(greater) > 0) {
-                    node = node.getChild(numberOfKeys);
-                    continue;
-                }
-
-                // Search internal nodes
-                for (int i = 1; i < node.numberOfKeys(); i++) {
-                    T prev = node.getKey(i - 1);
-                    T next = node.getKey(i);
-                    if (value.compareTo(prev) > 0 && value.compareTo(next) <= 0) {
-                        node = node.getChild(i);
-                        break;
-                    }
-                }
-            }
-        }
-
-        size++;
-
-        return true;
-    }
 
     /**
      * The node's key size is greater than maxKeySize, split down the middle.
@@ -309,56 +254,6 @@ public class BTree<T extends Comparable<T>> {
             return parent;
         }
 
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public T remove(T value) {
-        T removed = null;
-        Node<T> node = this.getNode(value);
-        removed = remove(value, node);
-        return removed;
-    }
-
-    /**
-     * Remove the value from the Node and check invariants
-     *
-     * @param value T to remove from the tree
-     * @param node  Node to remove value from
-     * @return True if value was removed from the tree.
-     */
-    private T remove(T value, Node<T> node) {
-        if (node == null) return null;
-
-        T removed = null;
-        int index = node.indexOf(value);
-        removed = node.removeKey(value);
-        if (node.numberOfChildren() == 0) {
-            // leaf node
-            if (node.parent != null && node.numberOfKeys() < minKeySize) {
-                this.combined(node);
-            } else if (node.parent == null && node.numberOfKeys() == 0) {
-                // Removing root node with no keys or children
-                root = null;
-            }
-        } else {
-            // internal node
-            Node<T> lesser = node.getChild(index);
-            Node<T> greatest = this.getGreatestNode(lesser);
-            T replaceValue = this.removeGreatestValue(greatest);
-            node.addKey(replaceValue);
-            if (greatest.parent != null && greatest.numberOfKeys() < minKeySize) {
-                this.combined(greatest);
-            }
-            if (greatest.numberOfChildren() > maxChildrenSize) {
-                this.split(greatest);
-            }
-        }
-
-        size--;
-
-        return removed;
     }
 
     /**
